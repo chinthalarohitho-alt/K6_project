@@ -1,0 +1,32 @@
+name: K6 Load Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  run-k6-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up K6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run K6 Petstore Smoke Test
+        run: k6 run ./scripts/petstore/smoke.js
+
+      - name: Save test results
+        run: |
+          mkdir -p reports
+          k6 run ./scripts/petstore/smoke.js --out json=reports/smoke-results.json
+
+      - name: Upload reports as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-reports
+          path: reports/

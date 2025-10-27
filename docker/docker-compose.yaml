@@ -1,0 +1,14 @@
+services:
+  k6:
+    build:
+      context: .
+    volumes:
+      - ../scripts:/scripts
+      - ../reports:/reports
+    working_dir: /scripts
+    entrypoint: ["k6", "run"]
+    command: ["/scripts/petstore/smoke.js", "--out", "json=/reports/smoke-results.json"]
+    environment:
+      - K6_WEB_DASHBOARD=true
+      - K6_WEB_DASHBOARD_EXPORT=/reports/smoke-report.html
+

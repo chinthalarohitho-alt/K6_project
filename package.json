@@ -1,0 +1,28 @@
+{
+  "name": "k6_project",
+  "version": "1.0.0",
+  "description": "This repository contains k6 load testing scripts for Petstore and Reqres APIs, along with Docker support for containerized runs.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chinthalarohitho-alt/K6_project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/chinthalarohitho-alt/K6_project/issues"
+  },
+  "homepage": "https://github.com/chinthalarohitho-alt/K6_project#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@avitalique/k6-html-reporter": "^1.0.5-dev.4",
+    "k6-html-reporter": "^1.0.5"
+  }
+}
