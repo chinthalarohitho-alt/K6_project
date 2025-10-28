@@ -1,39 +1,53 @@
 import http from 'k6/http';
-import { check, sleep } from 'k6';
+import { check, sleep, group } from 'k6';
 import { reportHTML } from "https://raw.githubusercontent.com/fziviello/k6-report-html/main/dist/reportHtml.min.js";
 
 export let options = { vus: 1, iterations: 2 }; // 2 iterations per endpoint set
 
-const PETSTORE_BASE = __ENV.PETSTORE_URL || 'https://petstore.swagger.io/v2';
-const REQRES_BASE = __ENV.REQRES_URL || 'https://reqres.in/api';
+const BASE_URL = "https://petstore.swagger.io/v2";
+const params = { headers: { "Content-Type": "application/json" } };
 
 export default function () {
-    // Petstore: GET pet by id
-    let petRes = http.get(`${PETSTORE_BASE}/pet/1`);
-    check(petRes, { 'Petstore GET /pet/1 is 200': (r) => r.status === 200 });
+    let petId;
 
-    // Petstore: GET store inventory
-    let invRes = http.get(`${PETSTORE_BASE}/store/inventory`);
-    check(invRes, { 'Petstore GET /store/inventory is 200': (r) => r.status === 200 });
-
-    // Reqres: List users
-    let userRes = http.get(`${REQRES_BASE}/users?page=2`);
-    check(userRes, { 'Reqres GET /users?page=2 is 200': (r) => r.status === 200 });
-
-    // Reqres: Health endpoint (should be 200)
-    let healthRes = http.get(`${REQRES_BASE}/health`);
-    check(healthRes, { 'Reqres GET /health is 200': (r) => r.status === 200 || r.status === 404 }); // fallback for cases /health not available
-
-    // Reqres: Login positive (demo credentials)
-    let loginRes = http.post(`${REQRES_BASE}/login`, JSON.stringify({
-        email: 'eve.holt@reqres.in',
-        password: 'cityslicka'
-    }), {
-        headers: { 'Content-Type': 'application/json' }
+    group("API Health Check", function() {
+        // 1. Health: Get store inventory
+        const invRes = http.get(`${BASE_URL}/store/inventory`);
+        check(invRes, { "GET /store/inventory returns 200": (r) => r.status === 200 });
     });
-    check(loginRes, { 'Reqres POST /login is 200': (r) => r.status === 200 });
-}
 
+    group("Create and Read Pet", function() {
+        // 2. Create Pet
+        petId = Math.floor(Math.random() * 1000000);
+        const createPayload = JSON.stringify({ id: petId, name: "SmokePet", photoUrls: [""], status: "available" });
+        const createRes = http.post(`${BASE_URL}/pet`, createPayload, params);
+        check(createRes, {
+            "POST /pet returns 200": (r) => r.status === 200,
+            "POST /pet returns correct pet ID": (r) => r.json("id") === petId,
+        });
+
+        // 3. Read Pet
+        const readRes = http.get(`${BASE_URL}/pet/${petId}`);
+        check(readRes, {
+            "GET /pet/{petId} returns 200": (r) => r.status === 200,
+            "GET /pet/{petId} returns correct pet ID": (r) => r.json("id") === petId,
+        });
+    });
+
+    group("Place Order and Cleanup", function() {
+        if (!petId) return; // Don't proceed if pet creation failed
+        // 4. Place Order
+        const orderPayload = JSON.stringify({ petId: petId, quantity: 1, status: "placed", complete: true });
+        const orderRes = http.post(`${BASE_URL}/store/order`, orderPayload, params);
+        check(orderRes, { "POST /store/order returns 200": (r) => r.status === 200 });
+
+        // 5. Delete Pet
+        const delRes = http.del(`${BASE_URL}/pet/${petId}`);
+        check(delRes, { "DELETE /pet/{petId} returns 200": (r) => r.status === 200 });
+    });
+
+    sleep(1);
+}
 
 // Custom summary function with timestamped filename
 export function handleSummary(data) {
@@ -55,7 +69,7 @@ export function handleSummary(data) {
   // Save HTML with dynamic name
   return {
     [`reports/petstore-smoke-report-${timestamp}.html`]: reportHTML(data, {
-      title: `ReqRes API Stress Test - ${timestamp}`,
+      title: `Petstore API Smoke Test - ${timestamp}`,
     }),
   };
 }
