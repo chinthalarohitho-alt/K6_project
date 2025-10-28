@@ -35,15 +35,19 @@ jobs:
       
       - name: Send email if K6 fails
         if: failure()
-        uses: murbil/email-action@v1.1
+        uses: devops-actions/email@v2.2.0
         with:
-          smtp-server: smtp.gmail.com
-          smtp-username: chinthalarohitho@gmail.com
-          smtp-password: oncc cqdg jlek faao
-          to: chinthalarohitho@gmail.com
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
           subject: "🚨 K6 Test Failed in K6_project"
           body: |
             Automated notification:
             Your K6 test failed in GitHub Actions.
             Please check the latest workflow run for details.
+          to: chinthalarohitho@gmail.com
+          from: chinthalarohitho@gmail.com
+          secure: true
+
  
