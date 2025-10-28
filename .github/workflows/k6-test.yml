@@ -35,7 +35,7 @@ jobs:
       
       - name: Send email if K6 fails
         if: failure()
-        uses: devops-actions/email@v2.2.0
+        uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
           server_port: 587
