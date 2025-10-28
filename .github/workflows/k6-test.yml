@@ -38,16 +38,15 @@ jobs:
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
-          server_port: 587
+          server_port: 465      # <--- Use 465 for SSL
+          secure: true          # <--- Make sure this is set to true!
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
+          to: chinthalarohitho@gmail.com
+          from: chinthalarohitho@gmail.com
           subject: "🚨 K6 Test Failed in K6_project"
           body: |
             Automated notification:
             Your K6 test failed in GitHub Actions.
-            Please check the latest workflow run for details.
-          to: chinthalarohitho@gmail.com
-          from: chinthalarohitho@gmail.com
-          secure: true
 
  
