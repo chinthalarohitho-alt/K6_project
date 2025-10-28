@@ -41,7 +41,7 @@ jobs:
           smtp-username: chinthalarohitho@gmail.com
           smtp-password: oncc cqdg jlek faao
           to: chinthalarohitho@gmail.com
-          subject: "🚨 K6 Test Failed in ${{ github.repository }}"
+          subject: "🚨 K6 Test Failed in K6_project"
           body: |
             Automated notification:
             Your K6 test failed in GitHub Actions.
