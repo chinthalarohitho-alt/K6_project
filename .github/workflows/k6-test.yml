@@ -18,10 +18,9 @@ jobs:
         uses: grafana/setup-k6-action@v1
 
       - name: Run K6 Petstore Smoke Test
-      run: |
-        k6 run ./scripts/petstore/smoke.js
-        k6 run ./scripts/reqres/smoke.js
-
+        run: |
+           k6 run ./scripts/petstore/smoke.js
+           k6 run ./scripts/reqres/smoke.js
 
       - name: Save test results
         run: |
