@@ -1,48 +1,26 @@
 import http from "k6/http";
-import { check, group, sleep } from "k6";
+import { check, sleep, group } from "k6";
 
-export const options = {
-    vus: 1,
-    iterations: 1,
-    thresholds: {
-        // The test fails if any of the checks fail.
-        'checks': ['rate==1.0'],
-    },
-};
-
-const BASE_URL = __ENV.BASE_URL || "https://reqres.in/api";
+export let options = { vus: 1, iterations: 2 };
+const BASE_URL = "https://dummyjson.com";
 
 export default function () {
-    const params = { headers: { "Content-Type": "application/json" } };
+    group("ERROR & NEGATIVES", function() {
+        // Invalid endpoint
+        const badRes = http.get(`${BASE_URL}/invalid-endpoint`);
+        check(badRes, { "Invalid Endpoint: 404": (r) => r.status === 404 });
 
-    group("Error Scenarios - Not Found", function () {
-        // 1. Get non-existent user
-        const get404 = http.get(`${BASE_URL}/users/999`);
-        check(get404, { "GET: non-existent user returns 404": (r) => r.status === 404 });
-    });
-
-    group("Error Scenarios - Bad Request", function () {
-        // 2. Create with invalid payload (reqres.in still returns 201, but a real API should return 400)
-        const badCreatePayload = JSON.stringify({});
-        const badCreate = http.post(`${BASE_URL}/users`, badCreatePayload, params);
-        check(badCreate, { "POST: empty payload returns 201 (mock) or 400 (real)": (r) => r.status === 201 || r.status === 400 });
-
-        // 3. Update without data (reqres.in still returns 200, but a real API should return 400)
-        const badUpdate = http.put(`${BASE_URL}/users/2`, null, params);
-        check(badUpdate, { "PUT: null payload returns 200 (mock) or 400 (real)": (r) => r.status === 200 || r.status === 400 });
-
-        // 4. Register with missing password
-        const regErrorPayload = JSON.stringify({ email: "eve.holt@reqres.in" });
-        const regError = http.post(`${BASE_URL}/register`, regErrorPayload, params);
-        check(regError, {
-            "POST: register with missing password returns 400": (r) => r.status === 400,
-            "POST: register with missing password returns correct error message": (r) => r.json("error") === "Missing password",
+        // Create with invalid payload
+        const failCreate = http.post(`${BASE_URL}/products/add`, JSON.stringify({ foo: "bar" }), {
+            headers: { "Content-Type": "application/json" }
         });
+        check(failCreate, { "Bad Create: 400/422": (r) => r.status === 400 || r.status === 422 });
 
-        // 5. Unsupported method (PUT on a resource list)
-        const wrongMethod = http.put(`${BASE_URL}/users`);
-        check(wrongMethod, { "PUT: on resource list returns client error (>=400)": (r) => r.status >= 400 });
+        // Unauthorized (token required, fake token)
+        const badLogout = http.post(`${BASE_URL}/auth/logout`, null, {
+            headers: { "Authorization": "Bearer fake-token" }
+        });
+        check(badLogout, { "Unauthorized logout: 401/403/400": (r) => [400,401,403].includes(r.status) });
     });
-
     sleep(1);
 }

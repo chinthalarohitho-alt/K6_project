@@ -1,54 +1,43 @@
 import http from "k6/http";
-import { check, group, sleep } from "k6";
+import { check, sleep, group, fail } from "k6";
 
-// Use an environment variable for the base URL, with a default for convenience.
-// k6 run -e BASE_URL=https://my-test-api.com scripts/reqres/auth.js
-const BASE_URL = __ENV.BASE_URL || "https://reqres.in/api";
-
-export const options = {
-    vus: 1,
-    iterations: 1,
-    thresholds: {
-        // The test fails if any of the checks fail.
-        'checks': ['rate==1.0'],
-    },
-};
+export let options = { vus: 1, iterations: 2, thresholds: { 'checks': ['rate==1.0'] } };
+const BASE_URL = "https://dummyjson.com";
+const VALID_USER = { username: "kminchelle", password: "0lelplR" };
 
 export default function () {
-    const params = { headers: { "Content-Type": "application/json" } };
-
-    group("Authentication - Login", function () {
-        const loginSuccessPayload = JSON.stringify({ email: "eve.holt@reqres.in", password: "cityslicka" });
-        const loginRes = http.post(`${BASE_URL}/login`, loginSuccessPayload, params);
+    group("AUTH: Login, Token Validation, Logout, Negative Cases", function() {
+        // Valid login
+        const loginRes = http.post(`${BASE_URL}/auth/login`, JSON.stringify(VALID_USER), {
+            headers: { "Content-Type": "application/json" }
+        });
         check(loginRes, {
-            "successful login returns 200": (r) => r.status === 200,
-            "successful login response has a token": (r) => typeof r.json("token") === 'string' && r.json("token") !== '',
+            "LOGIN: status 200": (r) => r.status === 200,
+            "LOGIN: token exists": (r) => !!r.json("token"),
+            "LOGIN: returned user": (r) => r.json("username") === VALID_USER.username
+        }) || fail(`Login failed: ${loginRes.status} - ${loginRes.body}`);
+        const token = loginRes.json("token");
+
+        // Token validation
+        const userRes = http.get(`${BASE_URL}/auth/me`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        check(userRes, {
+            "TOKEN VALID: 200": (r) => r.status === 200,
+            "TOKEN VALID: user is correct": (r) => r.json("username") === VALID_USER.username
         });
 
-        const loginFailPayload = JSON.stringify({ email: "eve.holt@reqres.in" });
-        const loginFailRes = http.post(`${BASE_URL}/login`, loginFailPayload, params);
-        check(loginFailRes, {
-            "failed login returns 400": (r) => r.status === 400,
-            "failed login response has 'Missing password' error": (r) => r.json("error") === "Missing password",
+        // Logout (Bearer required)
+        const logoutRes = http.post(`${BASE_URL}/auth/logout`, null, {
+            headers: { "Authorization": `Bearer ${token}` }
         });
+        check(logoutRes, { "LOGOUT: status 200": (r) => r.status === 200 });
+
+        // Negative: Bad login
+        const badLogin = http.post(`${BASE_URL}/auth/login`, JSON.stringify({ username: "foo", password: "bar" }), {
+            headers: { "Content-Type": "application/json" }
+        });
+        check(badLogin, { "LOGIN INVALID: 400": (r) => r.status === 400 });
     });
-
-    group("Authentication - Register", function () {
-        const registerSuccessPayload = JSON.stringify({ email: "eve.holt@reqres.in", password: "pistol" });
-        const regRes = http.post(`${BASE_URL}/register`, registerSuccessPayload, params);
-        check(regRes, {
-            "successful register returns 200": (r) => r.status === 200,
-            "successful register response has a numeric id and a token": (r) => typeof r.json("id") === 'number' && typeof r.json("token") === 'string',
-        });
-
-        const registerFailPayload = JSON.stringify({ email: "sydney@fife" });
-        const regFailRes = http.post(`${BASE_URL}/register`, registerFailPayload, params);
-        check(regFailRes, {
-            "failed register returns 400": (r) => r.status === 400,
-            "failed register response has 'Missing password' error": (r) => r.json("error") === "Missing password",
-        });
-    });
-
-    // Add a short sleep to be a good citizen.
     sleep(1);
 }

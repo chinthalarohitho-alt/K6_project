@@ -1,64 +1,57 @@
 import http from "k6/http";
-import { check, group, sleep } from "k6";
+import { check, sleep, group, fail } from "k6";
 
-export const options = {
-    vus: 1,
-    iterations: 1,
-    thresholds: {
-        // The test fails if any of the checks fail.
-        'checks': ['rate==1.0'],
-    },
-};
-
-const BASE_URL = __ENV.BASE_URL || "https://reqres.in/api";
+export let options = { vus: 1, iterations: 2, thresholds: { 'checks': ['rate==1.0'] } };
+const BASE_URL = "https://dummyjson.com";
+const productPayload = { title: "QA Portfolio Product", price: 123, category: "smartphones" };
 
 export default function () {
-    const params = { headers: { "Content-Type": "application/json" } };
-    let userId;
-
-    group("Create User", function () {
-        const userPayload = { name: "John", job: "QA" };
-        const createPayload = JSON.stringify(userPayload);
-        const createRes = http.post(`${BASE_URL}/users`, createPayload, params);
+    group("CRUD: Products (Add, List, Get, Update, Delete, Negatives)", function() {
+        // Create
+        const createRes = http.post(`${BASE_URL}/products/add`, JSON.stringify(productPayload), {
+            headers: { "Content-Type": "application/json" }
+        });
         check(createRes, {
-            "CREATE: status is 201": (r) => r.status === 201,
-            "CREATE: response has a non-empty id": (r) => typeof r.json("id") === 'string' && r.json("id") !== '',
-            "CREATE: response contains correct name": (r) => r.json("name") === userPayload.name,
+            "CREATE: status 200": (r) => r.status === 200,
+            "CREATE: id exists": (r) => !!r.json("id"),
+            "CREATE: title match": (r) => r.json("title") === productPayload.title
+        }) || fail("Product create failed");
+        const productId = createRes.json("id");
+
+        // List
+        const listRes = http.get(`${BASE_URL}/products?limit=5`);
+        check(listRes, {
+            "LIST: status 200": (r) => r.status === 200,
+            "LIST: products present": (r) => Array.isArray(r.json("products"))
         });
-        userId = createRes.json("id");
-    });
 
-    // Since reqres.in is a mock API, the created user doesn't actually persist.
-    // A read on a real API would use the `userId` from the create step (e.g., http.get(`${BASE_URL}/users/${userId}`)).
-    group("Read User", function () {
-        const readRes = http.get(`${BASE_URL}/users/2`); // Using a known existing user for read
-        check(readRes, {
-            "READ: status is 200": (r) => r.status === 200,
-            "READ: response has data for user 2": (r) => r.json("data.id") === 2,
+        // Get by ID
+        const getRes = http.get(`${BASE_URL}/products/${productId}`);
+        check(getRes, {
+            "GET: status 200": (r) => r.status === 200,
+            "GET: correct title": (r) => r.json("title") === productPayload.title
         });
-    });
 
-    group("Update and Delete User", function () {
-        if (!userId) return; // Don't proceed if user creation failed
-
-        const updatedUserPayload = { name: "John Updated", job: "QA Lead" };
-        const updatePayload = JSON.stringify(updatedUserPayload);
-        const updateRes = http.put(`${BASE_URL}/users/${userId}`, updatePayload, params);
+        // Update
+        const updatePayload = { title: "QA Portfolio Product Updated", price: 150 };
+        const updateRes = http.put(`${BASE_URL}/products/${productId}`, JSON.stringify(updatePayload), {
+            headers: { "Content-Type": "application/json" }
+        });
         check(updateRes, {
-            "UPDATE (PUT): status is 200": (r) => r.status === 200,
-            "UPDATE (PUT): response contains updated name": (r) => r.json("name") === updatedUserPayload.name,
+            "UPDATE: status 200": (r) => r.status === 200,
+            "UPDATE: title match": (r) => r.json("title") === updatePayload.title
         });
 
-        const patchPayload = JSON.stringify({ job: "Principal QA" });
-        const patchRes = http.patch(`${BASE_URL}/users/${userId}`, patchPayload, params);
-        check(patchRes, {
-            "UPDATE (PATCH): status is 200": (r) => r.status === 200,
-            "UPDATE (PATCH): response contains updated job": (r) => r.json("job") === "Principal QA",
+        // Delete
+        const delRes = http.del(`${BASE_URL}/products/${productId}`);
+        check(delRes, {
+            "DELETE: status 200": (r) => r.status === 200,
+            "DELETE: id match": (r) => r.json("id") === productId
         });
 
-        const deleteRes = http.del(`${BASE_URL}/users/${userId}`);
-        check(deleteRes, { "DELETE: status is 204": (r) => r.status === 204 });
+        // Negative: Get non-existent
+        const badRes = http.get(`${BASE_URL}/products/9999999`);
+        check(badRes, { "GET BAD: 404": (r) => r.status === 404 });
     });
-
     sleep(1);
 }
