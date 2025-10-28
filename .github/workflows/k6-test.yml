@@ -34,16 +34,16 @@ jobs:
           path: reports/
       
       - name: Send email if K6 fails
-             if: failure()
-             uses: murbil/email-action@v1.1
-             with:
-               smtp-server: smtp.gmail.com
-               smtp-username: chinthalarohitho@gmail.com
-               smtp-password: oncc cqdg jlek faao
-               to: chinthalarohitho@gmail.com
-               subject: "🚨 K6 Test Failed in ${{ github.repository }}"
-               body: |
-                 Automated notification:
-                 Your K6 test failed in GitHub Actions.
-                 Please check the latest workflow run for details.
+        if: failure()
+        uses: murbil/email-action@v1.1
+        with:
+          smtp-server: smtp.gmail.com
+          smtp-username: chinthalarohitho@gmail.com
+          smtp-password: oncc cqdg jlek faao
+          to: chinthalarohitho@gmail.com
+          subject: "🚨 K6 Test Failed in ${{ github.repository }}"
+          body: |
+            Automated notification:
+            Your K6 test failed in GitHub Actions.
+            Please check the latest workflow run for details.
  
