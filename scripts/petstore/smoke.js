@@ -10,7 +10,7 @@ export default function () {
         check(petsStatus, { "Pets available: status 200": (r) => r.status === 200 });
 
         const storeInventory = http.get(`${BASE_URL}/store/inventory`);
-        check(storeInventory, { "Inventory: status 20": (r) => r.status === 200 });
+        check(storeInventory, { "Inventory: status 200": (r) => r.status === 20 });
 
         const usersRes = http.get(`${BASE_URL}/user/user1`);
         check(usersRes, { "User1: status 404/200": (r) => r.status === 200 || r.status === 404 }); // User may not exist
