@@ -1,0 +1,31 @@
+# Stage 1: Base image with k6
+FROM grafana/k6:latest as k6_base
+
+# Stage 2: Add Node.js and npm for helper scripts
+# The k6 image is based on Alpine, so we use 'apk' to install packages.
+FROM k6_base
+
+# Switch to the root user to install packages
+USER root
+
+# Install Node.js and npm. '--no-cache' reduces image size.
+RUN apk add --no-cache nodejs npm
+
+# Set the working directory for the application
+WORKDIR /app
+
+# Copy package.json and install dependencies first to leverage Docker's layer caching.
+# This step will only be re-run if package.json changes.
+COPY package.json ./
+COPY package-lock.json* ./
+RUN npm install
+
+# Copy the rest of the application code into the working directory.
+# The build context is the project root, as defined in docker-compose.yaml.
+COPY . .
+
+# Switch back to the non-root 'k6' user for security best practices.
+USER k6
+
+# Set the entrypoint to 'k6'. This allows 'docker compose run' to execute k6 commands directly.
+ENTRYPOINT ["k6"]
