@@ -6,28 +6,17 @@
   "scripts": {
     "generate:payloads": "node tools/generatePayloads.js",
     "test:imports": "node tools/checkImports.js",
-    "docker:build": "npm run generate:payloads && docker-compose -f docker/docker-compose.yaml build",
-    "test:petstore:crud": "npm run generate:payloads && K6_SCRIPT_NAME=scripts/petstore/crud.js API_TARGET=petstore docker-compose -f docker/docker-compose.yaml run --rm k6 run scripts/petstore/crud.js --out json=- | node tools/format-results.js",
-    "test:petstore:error": "npm run generate:payloads && K6_SCRIPT_NAME=scripts/petstore/error.js API_TARGET=petstore docker-compose -f docker/docker-compose.yaml run --rm k6 run scripts/petstore/error.js --out json=- | node tools/format-results.js",
-    "test:petstore:load": "npm run generate:payloads && K6_SCRIPT_NAME=scripts/petstore/load.js API_TARGET=petstore docker-compose -f docker/docker-compose.yaml run --rm k6 run scripts/petstore/load.js",
-    "test:petstore:smoke": "npm run generate:payloads && K6_SCRIPT_NAME=scripts/petstore/smoke.js API_TARGET=petstore docker-compose -f docker/docker-compose.yaml run --rm k6 run scripts/petstore/smoke.js --out json=- | node tools/format-results.js",
-    "test:petstore:user_and_order": "npm run generate:payloads && K6_SCRIPT_NAME=scripts/petstore/user_and_order.js API_TARGET=petstore docker-compose -f docker/docker-compose.yaml run --rm k6 run scripts/petstore/user_and_order.js --out json=- | node tools/format-results.js",
-    "test:reqres:auth": "npm run generate:payloads && K6_SCRIPT_NAME=scripts/reqres/auth.js API_TARGET=reqres docker-compose -f docker/docker-compose.yaml run --rm k6 run scripts/reqres/auth.js --out json=- | node tools/format-results.js",
-    "test:reqres:crud": "npm run generate:payloads && K6_SCRIPT_NAME=scripts/reqres/crud.js API_TARGET=reqres docker-compose -f docker/docker-compose.yaml run --rm k6 run scripts/reqres/crud.js --out json=- | node tools/format-results.js",
-    "test:reqres:data_driven": "npm run generate:payloads && K6_SCRIPT_NAME=scripts/reqres/data_driven.js API_TARGET=reqres docker-compose -f docker/docker-compose.yaml run --rm k6 run scripts/reqres/data_driven.js --out json=- | node tools/format-results.js",
-    "test:reqres:load": "npm run generate:payloads && K6_SCRIPT_NAME=scripts/reqres/load.js API_TARGET=reqres docker-compose -f docker/docker-compose.yaml run --rm k6 run scripts/reqres/load.js",
-    "test:reqres:smoke": "npm run generate:payloads && K6_SCRIPT_NAME=scripts/reqres/smoke.js API_TARGET=reqres docker-compose -f docker/docker-compose.yaml run --rm k6 run scripts/reqres/smoke.js --out json=- | node tools/format-results.js",
-    "local:test:petstore:error": "npm run generate:payloads && k6 run -e K6_SCRIPT_NAME=scripts/petstore/error.js -e API_TARGET=petstore scripts/petstore/error.js --out json=- | node tools/format-results.js",
-    "local:test:petstore:load": "npm run generate:payloads && k6 run -e K6_SCRIPT_NAME=scripts/petstore/load.js -e API_TARGET=petstore scripts/petstore/load.js",
-    "local:test:petstore:user_and_order": "npm run generate:payloads && k6 run -e K6_SCRIPT_NAME=scripts/petstore/user_and_order.js -e API_TARGET=petstore scripts/petstore/user_and_order.js --out json=- | node tools/format-results.js",
-    "local:test:reqres:auth": "npm run generate:payloads && k6 run -e K6_SCRIPT_NAME=scripts/reqres/auth.js -e API_TARGET=reqres scripts/reqres/auth.js --out json=- | node tools/format-results.js",
-    "local:test:reqres:crud": "npm run generate:payloads && k6 run -e K6_SCRIPT_NAME=scripts/reqres/crud.js -e API_TARGET=reqres scripts/reqres/crud.js --out json=- | node tools/format-results.js",
-    "local:test:reqres:data_driven": "npm run generate:payloads && k6 run -e K6_SCRIPT_NAME=scripts/reqres/data_driven.js -e API_TARGET=reqres scripts/reqres/data_driven.js --out json=- | node tools/format-results.js",
-    "local:test:reqres:load": "npm run generate:payloads && k6 run -e K6_SCRIPT_NAME=scripts/reqres/load.js -e API_TARGET=reqres scripts/reqres/load.js",
-    "local:test:petstore:crud": "npm run generate:payloads && API_TARGET=petstore k6 run -e ENV=beta scripts/petstore/crud.js --out json=- 2>&1 | node tools/format-results.js",
-    "local:test:petstore:smoke": "npm run generate:payloads && API_TARGET=petstore k6 run -e ENV=beta scripts/petstore/smoke.js --out json=- 2>&1 | node tools/format-results.js",
-    "local:test:reqres:smoke": "npm run generate:payloads && API_TARGET=reqres k6 run -e ENV=beta scripts/reqres/smoke.js --out json=- 2>&1 | node tools/format-results.js"
-  
+    "docker:build": "npm run generate:payloads && docker compose -f docker/docker-compose.yaml build",
+    "test:docker": "npm run generate:payloads && dotenv -- docker compose -f docker/docker-compose.yaml run --rm -e API_TARGET -e SCRIPT_NAME -e Env k6 run $SCRIPT_NAME --out json=- | node tools/format-results.js",
+    "test:local": "npm run generate:payloads && dotenv -- k6 run -e API_TARGET=$API_TARGET -e ENV=${Env:-beta} $SCRIPT_NAME --out json=- 2>&1 | node tools/format-results.js",
+    "test:petstore:crud": "API_TARGET=petstore SCRIPT_NAME=scripts/petstore/crud.js npm run test:docker",
+    "test:petstore:smoke": "API_TARGET=petstore SCRIPT_NAME=scripts/petstore/smoke.js npm run test:docker",
+    "test:reqres:crud": "API_TARGET=reqres SCRIPT_NAME=scripts/reqres/crud.js npm run test:docker",
+    "test:reqres:smoke": "API_TARGET=reqres SCRIPT_NAME=scripts/reqres/smoke.js npm run test:docker",
+    "local:test:petstore:crud": "API_TARGET=petstore SCRIPT_NAME=scripts/petstore/crud.js npm run test:local",
+    "local:test:petstore:smoke": "API_TARGET=petstore SCRIPT_NAME=scripts/petstore/smoke.js npm run test:local",
+    "local:test:reqres:crud": "API_TARGET=reqres SCRIPT_NAME=scripts/reqres/crud.js npm run test:local",
+    "local:test:reqres:smoke": "API_TARGET=reqres SCRIPT_NAME=scripts/reqres/smoke.js npm run test:local"
   },
   "keywords": [
     "k6",
@@ -40,6 +29,7 @@
   "license": "ISC",
   "devDependencies": {
     "boxen": "^5.1.2",
-    "chalk": "^4.1.2"
+    "chalk": "^4.1.2",
+    "dotenv-cli": "^7.4.2"
   }
 }

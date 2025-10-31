@@ -3,7 +3,8 @@ node_modules/
 
 # Environment variables
 # Never commit this file! It contains secrets.
-.env
+.env*
+!.env.example
 
 # Auto-generated files
 reports/

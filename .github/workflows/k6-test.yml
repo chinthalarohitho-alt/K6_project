@@ -28,6 +28,7 @@ jobs:
       - name: Run K6 Tests
         run: |
           npm run test:petstore:smoke
+          npm run test:petstore:crud
           npm run test:reqres:smoke
 
       - name: Upload reports as artifact

@@ -12,5 +12,5 @@ services:
       # Pass these environment variables from the host machine (set by npm scripts)
       # into the k6 container, so the test toolkit can use them.
       - API_TARGET
-      - ENV
-      - K6_SCRIPT_NAME
+      - Env
+      - SCRIPT_NAME
