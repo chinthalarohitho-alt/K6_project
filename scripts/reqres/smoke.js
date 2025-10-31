@@ -1,15 +1,20 @@
-import http from "k6/http";
-import { check, sleep, group } from "k6";
+import { createOptions, expectStatus, expectBodyNotEmpty, runTestGroup, setup, createApiClient, BASE_URL } from '../../utils/index.js';
 
-export let options = { vus: 1, iterations: 1, thresholds: { 'checks': ['rate==1.0'] } };
-const BASE_URL = "https://dummyjson.com";
+export const options = createOptions({
+    thresholds: {
+      'http_req_duration': ['p(95)<500'],
+    },
+});
+
+const api = createApiClient(BASE_URL);
 
 export default function () {
-    group("Smoke: Health Endpoints", function() {
-        const res = http.get(`${BASE_URL}/products`);
-        check(res, { "PRODUCTS: status 200": (r) => r.status === 200 });
-        const usersRes = http.get(`${BASE_URL}/users`);
-        check(usersRes, { "USERS: status 200": (r) => r.status === 200 });
-    });
-    sleep(1);
+  setup();
+  runTestGroup('Reqres Smoke Test', {
+    action: () => api.get('/users?page=2'),
+    checks: {
+      ...expectStatus(200),
+      ...expectBodyNotEmpty(),
+    }
+  });
 }

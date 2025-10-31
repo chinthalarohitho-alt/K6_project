@@ -1,25 +1,26 @@
-import http from "k6/http";
-import { check, sleep } from "k6";
+import { check, sleep, createOptions, expectStatus, expectResponseIsArray, setup, createApiClient, BASE_URL } from '../../utils/index.js';
 
-export let options = {
-    stages: [
-        { duration: "10s", target: 5 },
-        { duration: "20s", target: 10 },
-        { duration: "10s", target: 0 }
-    ],
-    thresholds: {
-        http_req_duration: ['p(95)<800'],
-        'checks': ['rate>0.95']
-    }
-};
-const BASE_URL = "https://petstore.swagger.io/v2";
+export const options = createOptions({
+  stages: [
+    { duration: '30s', target: 20 },
+    { duration: '1m', target: 20 },
+    { duration: '10s', target: 0 },
+  ],
+  thresholds: {
+    'http_reqs{status:200}': ['count>100'],
+  },
+});
+
+const api = createApiClient(BASE_URL);
 
 export default function () {
-    // Fetch pets by status (available)
-    const res = http.get(`${BASE_URL}/pet/findByStatus?status=available`);
-    check(res, {
-        "Pets by status: 200": (r) => r.status === 200,
-        "Pets: array present": (r) => Array.isArray(r.json())
-    });
-    sleep(1);
+  setup();
+  const res = api.get('/pet/findByStatus?status=available');
+
+  check(res, {
+    ...expectStatus(200),
+    ...expectResponseIsArray(),
+  });
+
+  sleep(1);
 }

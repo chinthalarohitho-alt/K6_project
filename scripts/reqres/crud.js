@@ -1,57 +1,49 @@
-import http from "k6/http";
-import { check, sleep, group, fail } from "k6";
+import { createOptions, randomInt, expectStatus, assertValue, assertExists, runTestGroup, assertTypeInt, setup, createApiClient, BASE_URL } from '../../utils/index.js';
 
-export let options = { vus: 1, iterations: 2, thresholds: { 'checks': ['rate==1.0'] } };
-const BASE_URL = "https://dummyjson.com";
-const productPayload = { title: "QA Portfolio Product", price: 123, category: "smartphones" };
+export const options = createOptions();
 
 export default function () {
-    group("CRUD: Products (Add, List, Get, Update, Delete, Negatives)", function() {
-        // Create
-        const createRes = http.post(`${BASE_URL}/products/add`, JSON.stringify(productPayload), {
-            headers: { "Content-Type": "application/json" }
-        });
-        check(createRes, {
-            "CREATE: status 200": (r) => r.status === 200,
-            "CREATE: id exists": (r) => !!r.json("id"),
-            "CREATE: title match": (r) => r.json("title") === productPayload.title
-        }) || fail("Product create failed");
-        const productId = createRes.json("id");
+  const api = createApiClient(BASE_URL);
+  setup();
+  let userId;
+  const randomUserId = randomInt(1, 12);
 
-        // List
-        const listRes = http.get(`${BASE_URL}/products?limit=5`);
-        check(listRes, {
-            "LIST: status 200": (r) => r.status === 200,
-            "LIST: products present": (r) => Array.isArray(r.json("products"))
-        });
+  // === 1. Create User (POST) ===
+  const createRes = runTestGroup('Step 1: Create User', {
+    action: () => api.post('/users', 'user_create'),
+    checks: {
+      ...expectStatus(201),
+      ...assertExists('id'),
+      ...assertValue('name', 'morpheus'),
+    },
+  });
+  userId = createRes ? createRes.json('id') : null;
+  if (!userId) {
+    // We don't exit here because subsequent steps use a different, random user ID.
+  }
 
-        // Get by ID
-        const getRes = http.get(`${BASE_URL}/products/${productId}`);
-        check(getRes, {
-            "GET: status 200": (r) => r.status === 200,
-            "GET: correct title": (r) => r.json("title") === productPayload.title
-        });
+  // === 2. Get User (GET) ===
+  runTestGroup('Step 2: Get Single User', {
+    action: () => api.get(`/users/${randomUserId}`),
+    checks: {
+      ...expectStatus(200),
+      ...assertValue('data.id', randomUserId),
+      ...assertTypeInt('data.id'),
+    },
+  });
 
-        // Update
-        const updatePayload = { title: "QA Portfolio Product Updated", price: 150 };
-        const updateRes = http.put(`${BASE_URL}/products/${productId}`, JSON.stringify(updatePayload), {
-            headers: { "Content-Type": "application/json" }
-        });
-        check(updateRes, {
-            "UPDATE: status 200": (r) => r.status === 200,
-            "UPDATE: title match": (r) => r.json("title") === updatePayload.title
-        });
+  // === 3. Update User (PUT) ===
+  runTestGroup('Step 3: Update User', {
+    action: () => api.put(`/users/${randomUserId}`, 'user_update'),
+    checks: {
+      ...expectStatus(200),
+      ...assertValue('job', 'zion resident'),
+    },
+  });
 
-        // Delete
-        const delRes = http.del(`${BASE_URL}/products/${productId}`);
-        check(delRes, {
-            "DELETE: status 200": (r) => r.status === 200,
-            "DELETE: id match": (r) => r.json("id") === productId
-        });
-
-        // Negative: Get non-existent
-        const badRes = http.get(`${BASE_URL}/products/9999999`);
-        check(badRes, { "GET BAD: 404": (r) => r.status === 404 });
-    });
-    sleep(1);
+  // === 4. Delete User (DELETE) ===
+  runTestGroup('Step 4: Delete User', {
+    action: () => api.del(`/users/${randomUserId}`),
+    checks: expectStatus(204),
+  });
 }

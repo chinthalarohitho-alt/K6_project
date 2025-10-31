@@ -1,0 +1,19 @@
+
+[
+  {
+    "name": "clarke",
+    "job": "commander"
+  },
+  {
+    "name": "bellamy",
+    "job": "guard"
+  },
+  {
+    "name": "octavia",
+    "job": "warrior"
+  },
+  {
+    "name": "raven",
+    "job": "mechanic"
+  }
+]

@@ -1,14 +1,16 @@
+version: '3.8'
+
 services:
   k6:
     build:
-      context: .
+      context: ..
+      dockerfile: docker/Dockerfile
+    working_dir: /app
     volumes:
-      - ../scripts:/scripts
-      - ../reports:/reports
-    working_dir: /scripts
-    entrypoint: ["k6", "run"]
-    command: ["/scripts/petstore/smoke.js", "--out", "json=/reports/smoke-results.json"]
+      - ../reports:/app/reports
     environment:
-      - K6_WEB_DASHBOARD=true
-      - K6_WEB_DASHBOARD_EXPORT=/reports/smoke-report.html
-
+      # Pass these environment variables from the host machine (set by npm scripts)
+      # into the k6 container, so the test toolkit can use them.
+      - API_TARGET
+      - ENV
+      - K6_SCRIPT_NAME

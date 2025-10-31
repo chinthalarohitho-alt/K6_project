@@ -1,0 +1,5 @@
+
+{
+  "name": "K6 API Functional Testing Framework",
+  "description": "A comprehensive, dockerized K6 framework for functional and load testing of REST APIs, featuring tests for Petstore and Reqres APIs."
+}

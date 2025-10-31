@@ -1,0 +1,19 @@
+
+{
+  "id": 0,
+  "category": {
+    "id": 1,
+    "name": "Dogs"
+  },
+  "name": "K6-Doggie",
+  "photoUrls": [
+    "string"
+  ],
+  "tags": [
+    {
+      "id": 0,
+      "name": "k6-test"
+    }
+  ],
+  "status": "available"
+}

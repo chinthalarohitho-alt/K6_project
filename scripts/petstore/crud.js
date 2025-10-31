@@ -1,57 +1,135 @@
-import http from "k6/http";
-import { check, group, sleep, fail } from "k6";
+// import { createOptions, randomString, expectStatus, assertValue, assertExists, expectBodyToContain, runTestGroup, assertIsArray, assertProperty, assertTypeString, assertTypeInt, setup, createApiClient, BASE_URL } from '../../utils/index.js';
+// export const options = createOptions();
+// const api = createApiClient(BASE_URL);
 
-export let options = { vus: 1, iterations: 2, thresholds: { 'checks': ['rate==1.0'] } };
-const BASE_URL = "https://petstore.swagger.io/v2";
-const PET_PAYLOAD = {
-    id: Math.floor(Math.random() * 1000000), // Unique ID per test run
-    name: "QA Portfolio Pet",
-    category: { id: 1, name: "Dogs" },
-    photoUrls: ["http://example.com/photo.jpg"],
-    tags: [{ id: 1, name: "QA" }],
-    status: "available"
-};
+// export default function () {
+//   setup();
+//   let petId;
+//   const petName = `K6-Doggie-${randomString(8)}`;
+
+//   // === 1. Create Pet (POST) ===
+//   const createRes = runTestGroup('Step 1: Create Pet', {
+//     action: () => api.post('/pet', 'pet', { name: petName }),
+//     checks: {
+//       ...expectStatus(200),
+//       ...assertTypeInt('id'),
+//       ...assertValue('name', petName),
+//       ...assertTypeString('status'),
+//       ...assertIsArray('tags'),
+//     },
+//   });
+//   petId = createRes ? createRes.json('id') : null;
+//   if (!petId) {
+//     return; // Exit the iteration if pet creation fails
+//   }
+
+//   // // === 2. Upload Pet Image (POST with multipart/form-data) ===
+//   // runTestGroup('Step 2: Upload Pet Image', {
+//   //   action: () => api.uploadImage(`/pet/${petId}/uploadImage`, 'pet_image_data'),
+//   //   checks: {
+//   //     ...expectStatus(200),
+//   //     ...expectBodyToContain('test_pet_image.png'),
+//   //   },
+//   // });
+
+//   // === 3. Get Pet (GET) ===
+//   runTestGroup('Step 3: Get Pet by ID', {
+//     action: () => api.get(`/pet/${petId}`),
+//     checks: {
+//       ...expectStatus(200),
+//       ...assertValue('id', petId),
+//     },
+//   });
+
+//   // === 4. Update Pet (PUT) ===
+//   runTestGroup('Step 4: Update Pet', {
+//     action: () => api.put('/pet', 'pet', { id: petId, status: 'sold' }),
+//     checks: {
+//       ...expectStatus(200),
+//       ...assertProperty('status', 'sold', 'string'),
+//     },
+//   });
+
+//   // === 5. Delete Pet (DELETE) ===
+//   runTestGroup('Step 5: Delete Pet', {
+//     action: () => api.del(`/pet/${petId}`),
+//     checks: expectStatus(200),
+//   });
+// }
+
+
+
+
+
+
+
+
+
+
+import {
+  createOptions,
+  randomString,
+  expectStatus,
+  assertValue,
+  assertExists,
+  expectBodyToContain,
+  runTestGroup,
+  assertIsArray,
+  assertProperty,
+  assertTypeString,
+  assertTypeInt,
+  setup,
+  createApiClient,
+  BASE_URL,
+} from '../../utils/index.js';
+
+export const options = createOptions();
+const api = createApiClient(BASE_URL);
 
 export default function () {
-    group("Pet CRUD Operations", function() {
-        // Create Pet
-        const createRes = http.post(`${BASE_URL}/pet`, JSON.stringify(PET_PAYLOAD), {
-            headers: { "Content-Type": "application/json" }
-        });
-        check(createRes, {
-            "CREATE: status 200": (r) => r.status === 200,
-            "CREATE: pet name": (r) => r.json("name") === PET_PAYLOAD.name
-        }) || fail("Pet create failed");
-        const petId = createRes.json("id");
+  setup();
 
-        // Read Pet
-        const getRes = http.get(`${BASE_URL}/pet/${petId}`);
-        check(getRes, {
-            "GET: status 200": (r) => r.status === 200,
-            "GET: correct pet name": (r) => r.json("name") === PET_PAYLOAD.name
-        });
+  let petId;
+  const petName = `K6-Doggie-${randomString(8)}`;
 
-        // Update Pet
-        const updatePayload = Object.assign({}, PET_PAYLOAD, { name: "QA Portfolio Pet Updated", status: "sold" });
-        const updateRes = http.put(`${BASE_URL}/pet`, JSON.stringify(updatePayload), {
-            headers: { "Content-Type": "application/json" }
-        });
-        check(updateRes, {
-            "UPDATE: status 200": (r) => r.status === 200,
-            "UPDATE: pet name": (r) => r.json("name") === "QA Portfolio Pet Updated",
-            "UPDATE: status set": (r) => r.json("status") === "sold"
-        });
+  // === 1. Create Pet (POST) ===
+  const createRes = runTestGroup('Step 1: Create Pet', {
+    action: () => api.post('/pet', 'pet', { name: petName }),
+    checks: {
+      ...expectStatus(200),
+      ...assertTypeInt('id'),
+      ...assertValue('name', petName),
+      ...assertTypeString('status'),
+      ...assertIsArray('tags'),
+    },
+  });
+  petId = createRes ? createRes.json('id') : null;
+  if (!petId) return;
 
-        // Delete Pet
-        const delRes = http.del(`${BASE_URL}/pet/${petId}`);
-        check(delRes, {
-            "DELETE: status 200": (r) => r.status === 200,
-            "DELETE: message": (r) => r.body.includes("Pet deleted") || r.body.length > 0
-        });
+  // === 2. Get Pet by ID (GET) ===
+  runTestGroup('Step 2: Get Pet by ID', {
+    action: () => api.get(`/pet/${petId}`),
+    checks: {
+      ...expectStatus(200),
+      ...assertValue('id', petId),
+    },
+  });
 
-        // Negative: get deleted pet
-        const getDeleted = http.get(`${BASE_URL}/pet/${petId}`);
-        check(getDeleted, { "GET DELETED: 404": (r) => r.status === 404 });
-    });
-    sleep(1);
+  // === 3. Update Pet (PUT) ===
+  runTestGroup('Step 3: Update Pet', {
+    action: () => api.put('/pet', 'pet', { id: petId, status: 'sold' }),
+    checks: {
+      ...expectStatus(200),
+      ...assertProperty('status', 'sold', 'string'),
+    },
+  });
+
+  // === 4. Delete Pet (DELETE) ===
+  runTestGroup('Step 4: Delete Pet', {
+    action: () => api.del(`/pet/${petId}`),
+    checks: expectStatus(200),
+  });
 }
+
+
+

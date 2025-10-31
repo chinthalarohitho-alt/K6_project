@@ -1,24 +1,27 @@
-import http from "k6/http";
-import { check, sleep, group } from "k6";
+import { createOptions, expectStatus, randomInt, runTestGroup, setup, createApiClient, BASE_URL } from '../../utils/index.js';
+export const options = createOptions();
 
-export let options = { vus: 1, iterations: 2 };
-const BASE_URL = "https://petstore.swagger.io/v2";
+const api = createApiClient(BASE_URL);
 
 export default function () {
-    group("Error and Negative Cases", function() {
-        // Invalid endpoint
-        const badRes = http.get(`${BASE_URL}/invalid`);
-        check(badRes, { "Invalid endpoint: 404": (r) => r.status === 404 });
+  setup();
 
-        // Invalid POST payload
-        const failCreate = http.post(`${BASE_URL}/pet`, JSON.stringify({ foo: "bar" }), {
-            headers: { "Content-Type": "application/json" }
-        });
-        check(failCreate, { "Invalid pet payload: 400/500": (r) => r.status === 400 || r.status === 500 });
+  // === Test Case 1: Get a non-existent pet (expect 404) ===
+  runTestGroup('Get Non-Existent Pet', {
+    action: () => api.get(`/pet/${randomInt(1000000, 9999999)}`),
+    checks: expectStatus(404),
+  });
 
-        // Delete non-existent pet
-        const badDelete = http.del(`${BASE_URL}/pet/0`);
-        check(badDelete, { "Delete non-existent pet: 404": (r) => r.status === 404 });
-    });
-    sleep(1);
+  // === Test Case 2: Send an invalid request body (expect 500 from this specific API) ===
+  runTestGroup('Create Pet with Invalid Payload', {
+    action: () => api.post('/pet', 'pet_invalid'),
+    checks: expectStatus(500),
+  });
+
+  // === Test Case 3: Demonstrate passing custom headers via the API client ===
+  runTestGroup('Get Non-Existent Pet with Custom Header', {
+    action: () => api.get(`/pet/${randomInt(1000000, 9999999)}`, {headers: { 'X-Test-Header': 'My-Custom-Value' } }),
+    checks: expectStatus(404)
+  });
+
 }

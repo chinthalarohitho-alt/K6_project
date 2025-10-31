@@ -1,0 +1,20 @@
+
+{
+  "petstore": {
+    "production": {
+      "baseUrl": "https://petstore.swagger.io/v2"
+    },
+    "staging": {
+      "baseUrl": "https://staging.petstore.swagger.io/v2",
+      "botId": "vy5466878"
+    }
+  },
+  "reqres": {
+    "production": {
+      "baseUrl": "https://reqres.in/api"
+    },
+    "staging": {
+      "baseUrl": "https://staging.reqres.in/api"
+    }
+  }
+}
