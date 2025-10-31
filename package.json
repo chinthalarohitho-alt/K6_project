@@ -24,9 +24,10 @@
     "local:test:reqres:crud": "npm run generate:payloads && k6 run -e K6_SCRIPT_NAME=scripts/reqres/crud.js -e API_TARGET=reqres scripts/reqres/crud.js --out json=- | node tools/format-results.js",
     "local:test:reqres:data_driven": "npm run generate:payloads && k6 run -e K6_SCRIPT_NAME=scripts/reqres/data_driven.js -e API_TARGET=reqres scripts/reqres/data_driven.js --out json=- | node tools/format-results.js",
     "local:test:reqres:load": "npm run generate:payloads && k6 run -e K6_SCRIPT_NAME=scripts/reqres/load.js -e API_TARGET=reqres scripts/reqres/load.js",
-    "local:test:reqres:smoke": "npm run generate:payloads && k6 run -e K6_SCRIPT_NAME=scripts/reqres/smoke.js -e API_TARGET=reqres scripts/reqres/smoke.js --out json=- | node tools/format-results.js",
     "local:test:petstore:crud": "npm run generate:payloads && API_TARGET=petstore k6 run -e ENV=beta scripts/petstore/crud.js --out json=- 2>&1 | node tools/format-results.js",
-    "local:test:petstore:smoke": "npm run generate:payloads && API_TARGET=petstore k6 run -e ENV=beta scripts/petstore/smoke.js --out json=- 2>&1 | node tools/format-results.js"
+    "local:test:petstore:smoke": "npm run generate:payloads && API_TARGET=petstore k6 run -e ENV=beta scripts/petstore/smoke.js --out json=- 2>&1 | node tools/format-results.js",
+    "local:test:reqres:smoke": "npm run generate:payloads && API_TARGET=reqres k6 run -e ENV=beta scripts/reqres/smoke.js --out json=- 2>&1 | node tools/format-results.js"
+  
   },
   "keywords": [
     "k6",

@@ -14,24 +14,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up K6
-        uses: grafana/setup-k6-action@v1
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      - name: Run K6 Petstore Smoke Test
-        run: |
-           k6 run ./scripts/petstore/smoke.js
-           k6 run ./scripts/reqres/smoke.js
+      - name: Install dependencies
+        run: npm install
 
-      - name: Save test results
+      - name: Build Docker image
+        run: npm run docker:build
+
+      - name: Run K6 Tests
         run: |
-          mkdir -p reports
-          k6 run ./scripts/petstore/smoke.js --out json=reports/smoke-results.json
+          npm run test:petstore:smoke
+          npm run test:reqres:smoke
 
       - name: Upload reports as artifact
         uses: actions/upload-artifact@v4
+        if: always() # Always upload, even if tests fail
         with:
-          name: k6-reports
-          path: reports/
+          name: k6-test-results
+          path: reports/ # This directory is created by the test runs if they produce reports
       
       - name: Send email if K6 fails
         if: failure()
