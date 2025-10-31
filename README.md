@@ -1,4 +1,4 @@
-# K6 API Functional & Load Testing Framework
+# K6 API Functional Testing Framework
 
 This project provides a comprehensive, dockerized framework for API testing using [k6](https://k6.io/). It demonstrates various testing scenarios against public APIs, including the Petstore API and the Reqres API.
 
