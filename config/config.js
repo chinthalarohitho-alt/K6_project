@@ -2,15 +2,17 @@
 //  Environment Config Loader
 // =============================================================
 const environments = JSON.parse(open('./environments.json'));
-
-export const API_TARGET = __ENV.API_TARGET; // e.g., 'petstore'
 export const ENV = __ENV.ENV || 'production'; // e.g., 'beta'
 
-if (!API_TARGET) {
+if (!__ENV.K6_SCRIPT_NAME) {
   throw new Error(
-    "Execution error: API_TARGET environment variable is not set. Please specify it via the npm script."
+    'Framework error: K6_SCRIPT_NAME environment variable not found. This should be set by the npm script.'
   );
 }
+
+// Automatically determine the API_TARGET from the script path (e.g., "scripts/petstore/crud.js" -> "petstore")
+const pathParts = __ENV.K6_SCRIPT_NAME.split('/');
+export const API_TARGET = pathParts.length > 1 ? pathParts[1] : null;
 
 if (!environments[API_TARGET] || !environments[API_TARGET][ENV]) {
   throw new Error(

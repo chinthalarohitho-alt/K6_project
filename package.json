@@ -7,16 +7,10 @@
     "generate:payloads": "node tools/generatePayloads.js",
     "test:imports": "node tools/checkImports.js",
     "docker:build": "npm run generate:payloads && docker compose -f docker/docker-compose.yaml build",
-    "test:docker": "npm run generate:payloads && dotenv -- docker compose -f docker/docker-compose.yaml run --rm -e API_TARGET -e SCRIPT_NAME -e Env k6 run $SCRIPT_NAME --out json=- | node tools/format-results.js",
-    "test:local": "npm run generate:payloads && dotenv -- k6 run -e API_TARGET=$API_TARGET -e ENV=${Env:-beta} $SCRIPT_NAME --out json=- 2>&1 | node tools/format-results.js",
-    "test:petstore:crud": "API_TARGET=petstore SCRIPT_NAME=scripts/petstore/crud.js npm run test:docker",
-    "test:petstore:smoke": "API_TARGET=petstore SCRIPT_NAME=scripts/petstore/smoke.js npm run test:docker",
-    "test:reqres:crud": "API_TARGET=reqres SCRIPT_NAME=scripts/reqres/crud.js npm run test:docker",
-    "test:reqres:smoke": "API_TARGET=reqres SCRIPT_NAME=scripts/reqres/smoke.js npm run test:docker",
-    "local:test:petstore:crud": "API_TARGET=petstore SCRIPT_NAME=scripts/petstore/crud.js npm run test:local",
-    "local:test:petstore:smoke": "API_TARGET=petstore SCRIPT_NAME=scripts/petstore/smoke.js npm run test:local",
-    "local:test:reqres:crud": "API_TARGET=reqres SCRIPT_NAME=scripts/reqres/crud.js npm run test:local",
-    "local:test:reqres:smoke": "API_TARGET=reqres SCRIPT_NAME=scripts/reqres/smoke.js npm run test:local"
+    "test": "npm run generate:payloads && dotenv -- docker compose -f docker/docker-compose.yaml run --rm -e SCRIPT_NAME -e Env k6 run --no-progress",
+    "load": "npm run generate:payloads && dotenv -- docker compose -f docker/docker-compose.yaml run --rm -e SCRIPT_NAME -e Env -e VUS -e DURATION -e LOAD_PROFILE k6 run --no-progress",
+    "test:local": "npm run generate:payloads && node tools/run.js",
+    "load:local": "npm run generate:payloads && node tools/run.js"
   },
   "keywords": [
     "k6",
@@ -28,8 +22,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "boxen": "^5.1.2",
-    "chalk": "^4.1.2",
     "dotenv-cli": "^7.4.2"
   }
 }

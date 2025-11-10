@@ -1,5 +1,5 @@
 import {
-  createFunctionalOptions,
+  createLoadOptions, // Use the load options function
   randomString,
   expectStatus,
   assertValue,
@@ -11,11 +11,9 @@ import {
   setup,
   createApiClient,
   BASE_URL,
-  handleSummary, // Import the summary handler
 } from '../../utils/index.js';
 
-export { handleSummary }; // Export it for k6 to use
-export const options = createFunctionalOptions();
+export const options = createLoadOptions(); // Configure for load testing
 const api = createApiClient(BASE_URL);
 
 export default function () {

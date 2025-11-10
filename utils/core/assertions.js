@@ -2,32 +2,15 @@
 // Using these helpers makes test scripts more declarative, readable, and maintainable.
 
 /**
- * A private helper to log rich assertion failure details for the formatter.
- * @private
- */
-function logAssertionFailure(checkName, expected, actual) {
-    // We use console.log here to emit a structured log that our Node.js formatter script can parse.
-    console.log(JSON.stringify({
-        type: 'assertion-failure',
-        checkName: checkName,
-        expected: expected,
-        actual: actual,
-    }));
-}
-
-/**
  * A private helper to create checks and log failures.
  * @private
  */
-function createCheck(name, validator, expected, getActual) {
+function createCheck(name, validator, _expected, getActual) {
     return {
         [name]: (r) => {
             if (!r) return false; // Guard against null responses
             const actual = getActual(r);
             const pass = validator(actual);
-            if (!pass) {
-                logAssertionFailure(name, expected, actual);
-            }
             return pass;
         }
     }

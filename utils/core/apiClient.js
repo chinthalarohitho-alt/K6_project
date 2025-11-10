@@ -3,36 +3,6 @@ import { getPayload } from './payloads.js';
 import { HEADERS } from '../../config/config.js';
 
 /**
- * Safely parse JSON responses to avoid crashes on invalid or empty data.
- */
-function safeJsonParse(body) {
-  try {
-    if (!body) return null;
-    return JSON.parse(body);
-  } catch {
-    return body;
-  }
-}
-
-/**
- * Log structured request/response info for formatter.
- * These logs will be captured and grouped under route boxes.
- */
-function logRequestDetails(method, url, res, requestBody) {
-  const structuredLog = {
-    type: 'request-details',
-    method,
-    url,
-    requestBody,
-    responseBody: res.body ? safeJsonParse(res.body) : null,
-    responseStatus: res.status,
-    responseStatusText: res.status_text || `${res.status} ${res.status_text || ''}`,
-    duration: res.timings.duration,
-  };
-  console.log(JSON.stringify(structuredLog));
-}
-
-/**
  * Resolve payload name or merge inline overrides.
  */
 function resolvePayload(payload, modifications) {
@@ -56,7 +26,6 @@ export function createApiClient(baseUrl) {
     get(endpoint, params) {
       const url = `${baseUrl}${endpoint}`;
       const res = http.get(url, this._mergeParams(params));
-      logRequestDetails('GET', url, res, null);
       return res;
     },
 
@@ -64,7 +33,6 @@ export function createApiClient(baseUrl) {
       const url = `${baseUrl}${endpoint}`;
       const body = resolvePayload(payload, modifications);
       const res = http.post(url, JSON.stringify(body), this._mergeParams(params));
-      logRequestDetails('POST', url, res, body);
       return res;
     },
 
@@ -72,14 +40,12 @@ export function createApiClient(baseUrl) {
       const url = `${baseUrl}${endpoint}`;
       const body = resolvePayload(payload, modifications);
       const res = http.put(url, JSON.stringify(body), this._mergeParams(params));
-      logRequestDetails('PUT', url, res, body);
       return res;
     },
 
     del(endpoint, params) {
       const url = `${baseUrl}${endpoint}`;
       const res = http.del(url, null, this._mergeParams(params));
-      logRequestDetails('DELETE', url, res, null);
       return res;
     },
 

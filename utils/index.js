@@ -5,23 +5,14 @@ import { API_TARGET, ENV, BASE_URL } from '../config/config.js';
 import { Trend } from 'k6/metrics';
 import { createApiClient as _createApiClient } from './core/apiClient.js';
 
-// --- Custom Metrics and Logging ---
-const logMetric = new Trend('custom_log', true);
-let metadataLogged = false;
+// A flag to ensure the header is printed only once per test run.
+let headerPrinted = false;
 
 /**
  * Logs run metadata once per test execution.
  */
 export function setup() {
-  if (!metadataLogged && __VU === 1 && __ITER === 0) {
-    logMetric.add(1, {
-      log_type: 'run_metadata',
-      script: __ENV.K6_SCRIPT_NAME,
-      api_target: API_TARGET,
-      environment: ENV,
-    });
-    metadataLogged = true;
-  }
+  // This function is now a placeholder for other setup logic if needed.
 }
 
 // ✅ Exported API client factory and default instance
@@ -40,29 +31,5 @@ export * from './core/helpers.js';
 export { getPayload } from './core/payloads.js';
 export * from './core/assertions.js';
 export { runTestGroup } from './core/testRunner.js';
-
-// ✅ Default test options
-export const defaultOptions = {
-  thresholds: {
-    'http_req_failed': ['rate<0.01'],
-    'http_req_duration': ['p(95)<1500'],
-  },
-  vus: 1,
-  iterations: 1,
-};
-
-/**
- * Merges custom test options with framework defaults.
- * @param {object} customOptions - Optional overrides.
- * @returns {object} Final k6 options.
- */
-export function createOptions(customOptions = {}) {
-  return {
-    ...defaultOptions,
-    ...customOptions,
-    thresholds: {
-      ...defaultOptions.thresholds,
-      ...(customOptions.thresholds || {}),
-    },
-  };
-}
+export { createFunctionalOptions, createLoadOptions } from './options.js';
+export { handleSummary } from './core/summary.js';

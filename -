@@ -1,0 +1,35 @@
+time="2025-11-10T16:27:28+05:30" level=info msg=" ✔ Step 1: Create Pet  [PASS] - POST https://petstore.swagger.io/v2/pet (254.37ms)"
+time="2025-11-10T16:27:28+05:30" level=info msg=" ✖ Step 2: Get Pet by ID  [FAIL] - GET https://petstore.swagger.io/v2/pet/9223372036854776000 (255.13ms)"
+time="2025-11-10T16:27:28+05:30" level=info msg="   └─ Failed Check Response: {\"code\":404,\"type\":\"unknown\",\"message\":\"java.lang.NumberFormatException: For input string: \\\"9223372036854776000\\\"\"}"
+time="2025-11-10T16:27:28+05:30" level=info msg=" ✖ Step 3: Update Pet  [FAIL] - PUT https://petstore.swagger.io/v2/pet (330.52ms)"
+time="2025-11-10T16:27:28+05:30" level=info msg="   └─ Failed Check Response: {\"code\":500,\"type\":\"unknown\",\"message\":\"something bad happened\"}"
+time="2025-11-10T16:27:29+05:30" level=info msg=" ✖ Step 4: Delete Pet  [FAIL] - DELETE https://petstore.swagger.io/v2/pet/9223372036854776000 (241.97ms)"
+time="2025-11-10T16:27:29+05:30" level=info msg="   └─ Failed Check Response: {\"code\":404,\"type\":\"unknown\",\"message\":\"java.lang.NumberFormatException: For input string: \\\"9223372036854776000\\\"\"}"
+[36mINFO[0m[0001]  ✔ Step 1: Create Pet  [PASS] - POST https://petstore.swagger.io/v2/pet (307.39ms) 
+[36mINFO[0m[0001]  ✖ Step 2: Get Pet by ID  [FAIL] - GET https://petstore.swagger.io/v2/pet/9223372036854776000 (252.89ms) 
+[36mINFO[0m[0001]    └─ Failed Check Response: {"code":404,"type":"unknown","message":"java.lang.NumberFormatException: For input string: \"9223372036854776000\""} 
+[36mINFO[0m[0001]  ✖ Step 3: Update Pet  [FAIL] - PUT https://petstore.swagger.io/v2/pet (278.36ms) 
+[36mINFO[0m[0001]    └─ Failed Check Response: {"code":500,"type":"unknown","message":"something bad happened"} 
+[36mINFO[0m[0002]  ✖ Step 4: Delete Pet  [FAIL] - DELETE https://petstore.swagger.io/v2/pet/9223372036854776000 (253.04ms) 
+[36mINFO[0m[0002]    └─ Failed Check Response: {"code":404,"type":"unknown","message":"java.lang.NumberFormatException: For input string: \"9223372036854776000\""} 
+time="2025-11-10T16:29:17+05:30" level=info msg=" ✔ Step 1: Create Pet  [PASS] - POST https://petstore.swagger.io/v2/pet (290.45ms)"
+time="2025-11-10T16:29:17+05:30" level=info msg=" ✖ Step 2: Get Pet by ID  [FAIL] - GET https://petstore.swagger.io/v2/pet/9223372036854776000 (353.01ms)"
+time="2025-11-10T16:29:17+05:30" level=info msg="   └─ Failed Check Response: {\"code\":404,\"type\":\"unknown\",\"message\":\"java.lang.NumberFormatException: For input string: \\\"9223372036854776000\\\"\"}"
+time="2025-11-10T16:29:17+05:30" level=info msg=" ✖ Step 3: Update Pet  [FAIL] - PUT https://petstore.swagger.io/v2/pet (254.90ms)"
+time="2025-11-10T16:29:17+05:30" level=info msg="   └─ Failed Check Response: {\"code\":500,\"type\":\"unknown\",\"message\":\"something bad happened\"}"
+time="2025-11-10T16:29:18+05:30" level=info msg=" ✖ Step 4: Delete Pet  [FAIL] - DELETE https://petstore.swagger.io/v2/pet/9223372036854776000 (249.18ms)"
+time="2025-11-10T16:29:18+05:30" level=info msg="   └─ Failed Check Response: {\"code\":404,\"type\":\"unknown\",\"message\":\"java.lang.NumberFormatException: For input string: \\\"9223372036854776000\\\"\"}"
+[36mINFO[0m[0001]  ✔ Step 1: Create Pet  [PASS] - POST https://petstore.swagger.io/v2/pet (250.45ms) 
+[36mINFO[0m[0001]  ✖ Step 2: Get Pet by ID  [FAIL] - GET https://petstore.swagger.io/v2/pet/9223372036854776000 (249.07ms) 
+[36mINFO[0m[0001]    └─ Failed Check Response: {"code":404,"type":"unknown","message":"java.lang.NumberFormatException: For input string: \"9223372036854776000\""} 
+[36mINFO[0m[0001]  ✖ Step 3: Update Pet  [FAIL] - PUT https://petstore.swagger.io/v2/pet (318.98ms) 
+[36mINFO[0m[0001]    └─ Failed Check Response: {"code":500,"type":"unknown","message":"something bad happened"} 
+[36mINFO[0m[0002]  ✖ Step 4: Delete Pet  [FAIL] - DELETE https://petstore.swagger.io/v2/pet/9223372036854776000 (248.43ms) 
+[36mINFO[0m[0002]    └─ Failed Check Response: {"code":404,"type":"unknown","message":"java.lang.NumberFormatException: For input string: \"9223372036854776000\""} 
+[36mINFO[0m[0001]  ✔ Step 1: Create Pet  [PASS] - POST https://petstore.swagger.io/v2/pet (257.79ms) 
+[36mINFO[0m[0001]  ✖ Step 2: Get Pet by ID  [FAIL] - GET https://petstore.swagger.io/v2/pet/9223372036854776000 (255.55ms) 
+[36mINFO[0m[0001]    └─ Failed Check Response: {"code":404,"type":"unknown","message":"java.lang.NumberFormatException: For input string: \"9223372036854776000\""} 
+[36mINFO[0m[0001]  ✖ Step 3: Update Pet  [FAIL] - PUT https://petstore.swagger.io/v2/pet (247.99ms) 
+[36mINFO[0m[0001]    └─ Failed Check Response: {"code":500,"type":"unknown","message":"something bad happened"} 
+[36mINFO[0m[0002]  ✖ Step 4: Delete Pet  [FAIL] - DELETE https://petstore.swagger.io/v2/pet/9223372036854776000 (313.64ms) 
+[36mINFO[0m[0002]    └─ Failed Check Response: {"code":404,"type":"unknown","message":"java.lang.NumberFormatException: For input string: \"9223372036854776000\""} 
